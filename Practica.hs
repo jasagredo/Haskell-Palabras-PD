@@ -121,7 +121,7 @@ intro2 :: [Palabra] -> IO ()
 intro2 p =
        do putStrLn "Escribe la palabra de destino"
           n <- getLine
-          intro3 p n
+          intro3 (reverse p) n
 
 -- Obtener las palabras origen
 intro1:: [Palabra] -> IO ()
