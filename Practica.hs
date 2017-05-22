@@ -85,12 +85,15 @@ comprobarExito estado destino nivel nivelAct estadosRestantes
 -- Función para tomar un estado de la lista de estados acumulados, ejecutar el proceso con ese estado y, en caso de que falle, intentarlo con el siguiente estado
 elegirEstado :: Palabra -> Int -> Int -> [Estado] -> Sol
 elegirEstado destino nivel nivelAct [] = Nothing
+elegirEstado destino nivel nivelAct ([]:estadosRestantes) = Nothing
 elegirEstado destino nivel nivelAct (estadoActual:estadosRestantes)
     | isJust z = z
     | isJust t = t
     | otherwise = Nothing
     where z = comprobarExito estadoActual destino nivel nivelAct estadosRestantes
           t = elegirEstado destino nivel nivelAct estadosRestantes
+
+elegirEstado':: Palabra -> [[Palabra]] -> Int -> [Estado] ->
 
 -- Transforma la solución en una lista de transformaciones
 muestraSol :: Sol -> [Transformacion]
