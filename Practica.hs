@@ -116,7 +116,7 @@ intro3:: [Palabra] -> Palabra -> IO ()
 intro3 p d =
        do putStrLn "Escribe el numero de pasos que quieres permitir. Por valores menores que uno se entenderá el proceso sin máximo de pasos."
           n <- getInt
-          if n > 0 then putStr $ (intercalate ", " (solucion p d n))++"\n"
+          if n > 0 then putStr $ (intercalate "\n" (solucion p d n))++"\n"
                    else do putStrLn
 
 -- Obtener la palabra de destino
