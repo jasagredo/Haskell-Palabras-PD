@@ -1,7 +1,11 @@
 -- Javier Sagredo Tamayo. Doble Grado en Ingeniería Informática y Matemáticas. Programación Declarativa. Curso 2016-2017
 
-import Data.List          -- Para usar las funciones permutations (l14) y intersect (l40, l41, l72)
-import Data.Maybe         -- Para usar la función isJust (l59, l60, l61, l62, l85, l86)
+-- Este programa está pensado para ser compilado y no interpretado pues en GHCi no puedes borrar de stdin un caracter y
+-- como el usuario puede equivocarse en la introducción de datos, es recomendable que esto se ejecute compilado (pues ese
+-- error desaparece)
+
+import Data.List          -- Para usar las funciones permutations, intersect, intercalate
+import Data.Maybe         -- Para usar la función isJust
 
 -- Definición de tipos
 type Palabra = [Char]                       -- Palabra, tipo básido de nuestro programa
@@ -54,7 +58,7 @@ desplazar :: Estado -> [Estado]
 desplazar estado = [ (("Desplazar "++x):fst estado,[  if y==x then opDesplazar y else y | y <- snd estado ]) | x <- snd estado ]
 
 -- Función para ejecutar las distintas operaciones disponibles sobre un mismo estado
-ejecutarOperacion :: (Ord a, Num a) => Estado -> Palabra -> a -> a -> [Estado] -> Sol
+ejecutarOperacion :: Estado -> Palabra -> Int -> Int -> [Estado] -> Sol
 ejecutarOperacion estado destino nivel nivelAct estadosRestantes
     | isJust c = c
     | isJust i = i
@@ -67,19 +71,19 @@ ejecutarOperacion estado destino nivel nivelAct estadosRestantes
           r = let z = desplazar estado in elegirEstado destino nivel nivelAct $ estadosRestantes ++ z
 
 -- Función para pasar a la siguiente fase si no hemos superado el número de pasos permitidos. Dentro de esta función se hace también la operación de comparación de las reordenaciones.
-comprobarNivel :: (Ord a, Num a) => Estado -> Palabra -> a -> a -> [Estado] -> Sol
+comprobarNivel :: Estado -> Palabra -> Int -> Int -> [Estado] -> Sol
 comprobarNivel estado destino nivel nivelAct estadosRestantes
     | nivel > nivelAct = let a =  intersect (opReordenar destino) (snd estado) in if (not $ null a) then Just $ ("Reordenar "++(head a)):(fst estado) else ejecutarOperacion estado destino nivel (nivelAct+1) estadosRestantes
     | otherwise = Nothing
 
 -- Función para comprobar si se encuentra la palabra destino en el estado actual. En caso contrario prosigue el proceso.
-comprobarExito :: (Ord a, Num a) => Estado -> Palabra -> a -> a -> [Estado] -> Sol
+comprobarExito :: Estado -> Palabra -> Int -> Int -> [Estado] -> Sol
 comprobarExito estado destino nivel nivelAct estadosRestantes
     | elem destino (snd estado) = Just $ fst estado
     | otherwise = comprobarNivel estado destino nivel nivelAct estadosRestantes
 
 -- Función para tomar un estado de la lista de estados acumulados, ejecutar el proceso con ese estado y, en caso de que falle, intentarlo con el siguiente estado
-elegirEstado :: (Ord a, Num a) => Palabra -> a -> a -> [Estado] -> Sol
+elegirEstado :: Palabra -> Int -> Int -> [Estado] -> Sol
 elegirEstado destino nivel nivelAct [] = Nothing
 elegirEstado destino nivel nivelAct (estadoActual:estadosRestantes)
     | isJust z = z
@@ -88,12 +92,44 @@ elegirEstado destino nivel nivelAct (estadoActual:estadosRestantes)
     where z = comprobarExito estadoActual destino nivel nivelAct estadosRestantes
           t = elegirEstado destino nivel nivelAct estadosRestantes
 
--- Transforma la solución mostrar bien la lista de transformaciones
-muestraSol :: (Num a, Show a) => a -> Sol -> [Transformacion]
-muestraSol nivel solucion = case solucion of
-                              Nothing -> []
+-- Transforma la solución en una lista de transformaciones
+muestraSol :: Sol -> [Transformacion]
+muestraSol solucion = case solucion of
+                              Nothing -> ["No es posible encontrar una solución en el número de pasos proporcionado"]
                               Just x -> reverse x
 
 -- Función principal
-solucion :: (Ord a, Num a, Show a) => [Palabra] -> Palabra -> a -> [Transformacion]
-solucion palabras destino nivel = muestraSol nivel $ elegirEstado destino nivel 0 [([],palabras)]
+solucion :: [Palabra] -> Palabra -> Int -> [Transformacion]
+solucion palabras destino nivel = muestraSol $ elegirEstado destino nivel 0 [([],palabras)]
+
+-- Funcion auxiliar para leer enteros
+getInt:: IO Int
+getInt = do line <- getLine
+            return (read line::Int)
+
+-- Obtener el numero de pasos que queremos permitir y realizar la llamada al proceso
+intro3:: [Palabra] -> Palabra -> IO ()
+intro3 p d =
+       do putStrLn "Escribe el numero de pasos que quieres permitir"
+          n <- getInt
+          if n > 0 then putStr $ (intercalate ", " (solucion p d n))++"\n"
+                   else do putStrLn "Error, número no puede ser menor que uno"
+                           intro3 p d
+
+-- Obtener la palabra de destino
+intro2 :: [Palabra] -> IO ()
+intro2 p =
+       do putStrLn "Escribe la palabra de destino"
+          n <- getLine
+          intro3 p n
+
+-- Obtener las palabras origen
+intro1:: [Palabra] -> IO ()
+intro1 p =
+       do n <- getLine
+          if n == "0" then intro2 p
+                    else intro1 (n:p)
+
+
+main = do putStrLn "Escribe la lista de palabras una en cada linea. Escribe 0 para continuar"
+          intro1 []
