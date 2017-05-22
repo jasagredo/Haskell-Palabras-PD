@@ -8,7 +8,7 @@ import Data.List          -- Para usar las funciones permutations, intersect, in
 import Data.Maybe         -- Para usar la función isJust
 
 -- Definición de tipos
-type Palabra = [Char]                       -- Palabra, tipo básido de nuestro programa
+type Palabra = [Char]                       -- Palabra, tipo básico de nuestro programa
 type Transformacion = Palabra               -- Una transformación será codificada también como una palabra
 type Sol = Maybe [Transformacion]           -- Una solución es una lista de Transformaciones o Nothing en caso de error
 type Estado = ([Transformacion], [Palabra]) -- Un estado es un par de las palabras actuales y su historia (el conjunto de transformaciones que nos han llevado a ellas)
@@ -55,7 +55,7 @@ restar :: Estado -> [Estado]
 restar estado = [ (("Restar de "++x++" la palabra "++y):fst estado,(opRestar x y):(consumir1 (snd estado) x)) | (x, y) <- obtener2 $ snd estado ]
 
 desplazar :: Estado -> [Estado]
-desplazar estado = [ (("Desplazar "++x):fst estado,[  if y==x then opDesplazar y else y | y <- snd estado ]) | x <- snd estado ]
+desplazar estado = [ (("Desplazar "++x):fst estado,(opDesplazar x):(consumir1 (snd estado) x)) | x <- snd estado ]
 
 -- Función para ejecutar las distintas operaciones disponibles sobre un mismo estado
 ejecutarOperacion :: Estado -> Palabra -> Int -> Int -> [Estado] -> Sol
