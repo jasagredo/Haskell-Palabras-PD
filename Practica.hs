@@ -102,6 +102,10 @@ muestraSol solucion = case solucion of
 solucion :: [Palabra] -> Palabra -> Int -> [Transformacion]
 solucion palabras destino nivel = muestraSol $ elegirEstado destino nivel 0 [([],palabras)]
 
+-- Función principal para el cómputo sin nivel
+solucion' :: [Palabra] -> Palabra -> [Transformacion]
+solucion' palabras destino = muestraSol $ elegirEstado' destino [palabras] 0 [([], palabras)]
+
 -- Funcion auxiliar para leer enteros
 getInt:: IO Int
 getInt = do line <- getLine
@@ -110,11 +114,10 @@ getInt = do line <- getLine
 -- Obtener el numero de pasos que queremos permitir y realizar la llamada al proceso
 intro3:: [Palabra] -> Palabra -> IO ()
 intro3 p d =
-       do putStrLn "Escribe el numero de pasos que quieres permitir"
+       do putStrLn "Escribe el numero de pasos que quieres permitir. Por valores menores que uno se entenderá el proceso sin máximo de pasos."
           n <- getInt
           if n > 0 then putStr $ (intercalate ", " (solucion p d n))++"\n"
-                   else do putStrLn "Error, número no puede ser menor que uno"
-                           intro3 p d
+                   else do putStrLn
 
 -- Obtener la palabra de destino
 intro2 :: [Palabra] -> IO ()
